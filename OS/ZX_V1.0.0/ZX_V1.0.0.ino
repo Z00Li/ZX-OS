@@ -8,15 +8,10 @@
 #include <EEPROM.h>                 // save to storage
 
 
-// -------------------- Setup --------------------
-#define FPSerial softSerial         // rename function
-DFRobotDFPlayerMini audio;          // rename function
-MPU6050 accelgyro;                  // rename function
-
-
 // -------------------- Settings --------------------
 #define debug 1                     // set 0 to turn off, set 1 to turn on
 #define audio_volume 4              // set between 0 and 30 (using amounts over 5 may not work on usb cable)
+#define ls_color Yellow             // set lightsaber color (Yellow, Green, Red, Blue...)
 
 
 // -------------------- Pins --------------------
@@ -24,6 +19,13 @@ MPU6050 accelgyro;                  // rename function
 #define DATA_PIN 6                  // data pin for leds
 SoftwareSerial softSerial(10, 11);  // TX and RX ports on mp3 player
 #define BATTERY_PIN A0              // which port the battery positive terminal is located in (USE VOLTAGE DIVIDER IF YOUR BATTERY VOLTAGE EXCEEDS 5V!!!)
+
+
+// -------------------- Setup --------------------
+#define FPSerial softSerial         // rename function
+DFRobotDFPlayerMini audio;          // rename function
+MPU6050 accelgyro;                  // rename function
+CRGB leds[NUM_LEDS];                // define leds function
 
 
 // -------------------- Sounds --------------------
@@ -52,6 +54,7 @@ void setup() {
   audio.volume(audio_volume);
   FPSerial.begin(9600);
   audio.begin(softSerial);
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
 
   // IMU check  -- for debug
@@ -110,6 +113,10 @@ void StateGesture() {
       delay(100);
       if (accelY < 60) {
         audio.play(power_on);
+        for (int line = 0; line < NUM_LEDS; line++) {
+          leds[line] = CRGB::ls_color;
+          FastLED.show();
+        }
         ls_state = true;
       }
     }
