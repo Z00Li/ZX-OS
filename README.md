@@ -6,6 +6,10 @@ This cutting-edge software boasts a remarkable library of sound effects, faithfu
 What sets ZX Saber apart is its dedication to realism. Utilizing advanced motion sensing technology, ZX accurately detects and responds to user movements, translating them into lifelike lightsaber combat. Engage in thrilling duels, either with friends or solo, as ZX captures the nuances of every move, providing an authentic experience. More than just software, ZX is a community-driven platform, encouraging collaboration and innovation. Open-source and constantly evolving, ZX Saber ensures a dynamic lightsaber experience that grows with the passion and creativity of its users.
 
 
+# Instructions 🛠️
+Included with the software, there are comprehensive building instructions that guide users through each step of the assembly process. These clear and user-friendly instructions ensure that even beginners can confidently navigate the construction of their lightsaber. The step-by-step guidance covers everything from assembling the hilt components to integrating the Arduino board and programming the desired features. With detailed illustrations and explanations, the instructions make the building process accessible, enjoyable, and educational. This ensures that users not only create a personalized lightsaber but also gain valuable insights into electronics and programming, enhancing the overall learning and crafting experience.
+
+
 # 3D Printing 🪄
 Transformative manufacturing tool that brings digital designs into the physical realm with precision and efficiency. At its core, this technology operates by layering materials, such as plastics, metals, or resins, based on a three-dimensional digital model. The process begins with the creation or selection of a digital design using computer-aided design (CAD) software. This technology has democratized manufacturing, empowering individuals and innovators to turn their concepts into tangible products.
 
