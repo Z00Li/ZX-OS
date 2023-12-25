@@ -1,31 +1,31 @@
 // -------------------- Libraries --------------------
-#include <Arduino.h>                // necessary arduino library
-#include <DFRobotDFPlayerMini.h>    // audio player
-#include <SoftwareSerial.h>         // audio transmit and receiver
-#include <Wire.h>                   // serial communication with audio transmitter
-#include <MPU6050.h>                // gyrosensor and acceleration meter
-#include <FastLED.h>                // addressable LED library
-#include <EEPROM.h>                 // save to storage
+#include <Arduino.h>                      // necessary arduino library
+#include <DFRobotDFPlayerMini.h>          // audio player
+#include <SoftwareSerial.h>               // audio transmit and receiver
+#include <Wire.h>                         // serial communication with audio transmitter
+#include <MPU6050.h>                      // gyrosensor and acceleration meter
+#include <FastLED.h>                      // addressable LED library
+#include <EEPROM.h>                       // save to storage
 
 
 // -------------------- Settings --------------------
-#define debug 1                     // set 0 to turn off, set 1 to turn on
-#define audio_volume 4              // set between 0 and 30 (using amounts over 5 may not work on usb cable)
-#define ls_color Yellow             // set lightsaber color (Yellow, Green, Red, Blue...)
+#define debug 1                           // set 0 to turn off, set 1 to turn on
+#define audio_volume 4                    // set between 0 and 30 (using amounts over 5 may not work on usb cable)
+#define ls_color Yellow                   // set lightsaber color (Yellow, Green, Red, Blue...)
 
 
 // -------------------- Pins --------------------
-#define NUM_LEDS 60                 // set how many leds are in the neopixel chain
-#define DATA_PIN 6                  // data pin for leds
-SoftwareSerial softSerial(10, 11);  // TX and RX ports on mp3 player
-#define BATTERY_PIN A0              // which port the battery positive terminal is located in (USE VOLTAGE DIVIDER IF YOUR BATTERY VOLTAGE EXCEEDS 5V!!!)
+#define NUM_LEDS 60                       // set how many leds are in the neopixel chain
+#define DATA_PIN 6                        // data pin for leds
+SoftwareSerial softSerial(10, 11);        // TX and RX ports on mp3 player
+#define BATTERY_PIN A0                    // which port the battery positive terminal is located in (USE VOLTAGE DIVIDER IF YOUR BATTERY VOLTAGE EXCEEDS 5V!!!)
 
 
 // -------------------- Setup --------------------
-#define FPSerial softSerial         // rename function
-DFRobotDFPlayerMini audio;          // rename function
-MPU6050 accelgyro;                  // rename function
-CRGB leds[NUM_LEDS];                // define leds function
+#define FPSerial softSerial               // rename function
+DFRobotDFPlayerMini audio;                // rename function
+MPU6050 accelgyro;                        // rename function
+CRGB leds[NUM_LEDS];                      // define leds function
 
 
 // -------------------- Sounds --------------------
@@ -70,6 +70,8 @@ void setup() {
   accelgyro.setFullScaleAccelRange(16);
   accelgyro.setFullScaleGyroRange(250);
 
+  // Battery check percent
+  CheckBattery();
 }
 
 void loop() {
@@ -109,7 +111,7 @@ void loop() {
 
 void StateGesture() {
   if (ls_state == false) {
-    if (accelY > 180) {
+    if (accelY > 180 && accelX < 30 && accelZ < 30) {
       delay(100);
       if (accelY < 60) {
         audio.play(power_on);
@@ -123,18 +125,38 @@ void StateGesture() {
   }
 
   if (ls_state == true){
-    int ns = 30;              // neutral state
+    int ns = 30;                          // neutral state
     if (gyroY >= 170 && gyroX < ns && gyroZ < ns && accelY < ns && accelX < ns && accelZ < ns) {
-      audio.play(power_off);
-      ls_state = false;
+      delay(100);
+      if (gyroY < ns && gyroX < ns && gyroZ < ns && accelY < ns && accelX < ns && accelZ < ns) {
+        ls_state = false;
+        audio.play(power_off);
+      }
     }
   }
 }
 
 void CheckBattery()
 {
-  value = analogRead(BATTERY_PIN);
+  value = analogRead(BATTERY_PIN);        // check battery
   voltage = value * 5.0/1023;
   perc = map(voltage, 3.6, 4.2, 0, 100);
 
+  if (debug == 1) {                       // battery percent for debug
+    Serial.println("Battery voltage: ");
+    Serial.print(voltage);
+    Serial.println("Battery percent: ");
+    Serial.print(perc);
+  }
+
+  int ledsToLight = map(perc, 0, 100, 0, NUM_LEDS);   // light leds, to match battery percent
+  for (int led = 0; led < ledsToLight; led++) {
+    leds[led] = CRGB::ls_color;
+  }
+  FastLED.show();
+  delay(3000);
+  for (int led = 0; led < NUM_LEDS; led ++) {         // turn off the leds after 3 seconds
+    leds[led] = CRGB::Black;
+  }
+  FastLED.show();
 }
