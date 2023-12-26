@@ -12,6 +12,7 @@
 #define debug 1                           // set 0 to turn off, set 1 to turn on
 #define audio_volume 4                    // set between 0 and 30 (using amounts over 5 may not work on usb cable)
 #define ls_color Yellow                   // set lightsaber color (Yellow, Green, Red, Blue...)
+#define LED_Brightness 80                 // set brightness from 0% to 100%
 
 
 // -------------------- Pins --------------------
@@ -55,6 +56,7 @@ void setup() {
   FPSerial.begin(9600);
   audio.begin(softSerial);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.setBrightness(map(LED_Brightness, 0, 100, 0, 255));
 
 
   // IMU check  -- for debug
@@ -106,6 +108,10 @@ void loop() {
     }
 
     StateGesture();
+    if (ls_state = true)
+    {
+      run();
+    }
   }
 }
 
@@ -159,4 +165,10 @@ void CheckBattery()
     leds[led] = CRGB::Black;
   }
   FastLED.show();
+}
+
+void run()
+{
+  audio.play(3);
+  if ()
 }
