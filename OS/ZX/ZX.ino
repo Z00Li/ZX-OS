@@ -9,17 +9,17 @@
 
 
 // -------------------- Settings --------------------
-#define debug 1                           // set 0 to turn off, set 1 to turn on
-#define audio_volume 4                    // set between 0 and 30 (using amounts over 5 may not work on usb cable)
+#define debug true                        // set false to turn off, set true to turn on
+#define audio_volume 4                    // set between 0 and 30 (using amounts over 20 may not work on usb cable)
 #define ls_color Yellow                   // set lightsaber color (Yellow, Green, Red, Blue...)
 #define LED_Brightness 80                 // set brightness from 0% to 100%
 
 
 // -------------------- Pins --------------------
 #define NUM_LEDS 60                       // set how many leds are in the neopixel chain
-#define DATA_PIN 6                        // data pin for leds
+#define DATA_PIN 14                       // data pin for leds
 SoftwareSerial softSerial(10, 11);        // TX and RX ports on mp3 player
-#define BATTERY_PIN A0                    // which port the battery positive terminal is located in (USE VOLTAGE DIVIDER IF YOUR BATTERY VOLTAGE EXCEEDS 5V!!!)
+#define BATTERY_PIN A1                    // which port the battery positive terminal is located in (USE VOLTAGE DIVIDER IF YOUR BATTERY VOLTAGE EXCEEDS 5V!!!)                                                           ---
 
 
 // -------------------- Setup --------------------
@@ -58,13 +58,19 @@ void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(map(LED_Brightness, 0, 100, 0, 255));
 
+  if (debug == true) {
+    #define dbgln Serial.println();
+    #define dbg Serial.print();
+  } else {
+    #define dbgln;
+    #define dbg
+  }
 
   // IMU check  -- for debug
-  if (debug == 1) {
-    if (accelgyro.testConnection()) 
-      Serial.println(F("MPU6050 OK"));
-    else
-      Serial.println(F("MPU6050 fail"));
+  if (accelgyro.testConnection()) {
+      dbgln(F("MPU6050 OK"));
+  } else {
+    dbgln(F("MPU6050 fail"));
   }
 
   // IMU initialization
@@ -77,11 +83,28 @@ void setup() {
 }
 
 void loop() {
+  delay(200);
 
-  if (millis() > 200){
+  dbg("$");
+  dbg(gyroX);
+  dbg(" ");
+  dbg(gyroY);
+  dbg(" ");
+  dbg(gyroZ);
+  dbgln(";");
+  dbg(accelY);
+
+  StateGesture();
+  if (ls_state = true)
+  {
+    run();
+  }
+}
+
+void GetVector() {
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);       
 
-    // find absolute and divide on 100
+    // find absolute value and divide on 100
     gyroX = abs(gx / 100);
     gyroY = abs(gy / 100);
     gyroZ = abs(gz / 100);
@@ -95,30 +118,13 @@ void loop() {
     GYR = sq((long)gyroX) + sq((long)gyroY) + sq((long)gyroZ);
     GYR = sqrt((long)GYR);
     COMPL = ACC + GYR;
-
-    if (debug == 1){  
-      Serial.print("$");
-      Serial.print(gyroX);
-      Serial.print(" ");
-      Serial.print(gyroY);
-      Serial.print(" ");
-      Serial.print(gyroZ);
-      Serial.println(";");
-      Serial.print(accelY);
-    }
-
-    StateGesture();
-    if (ls_state = true)
-    {
-      run();
-    }
-  }
 }
 
 void StateGesture() {
   if (ls_state == false) {
     if (accelY > 180 && accelX < 30 && accelZ < 30) {
-      delay(100);
+      dbg("StateGestures 1");
+      GetVector();
       if (accelY < 60) {
         audio.play(power_on);
         for (int line = 0; line < NUM_LEDS; line++) {
@@ -128,9 +134,7 @@ void StateGesture() {
         ls_state = true;
       }
     }
-  }
-
-  if (ls_state == true){
+  } else {
     int ns = 30;                          // neutral state
     if (gyroY >= 170 && gyroX < ns && gyroZ < ns && accelY < ns && accelX < ns && accelZ < ns) {
       delay(100);
@@ -170,5 +174,8 @@ void CheckBattery()
 void run()
 {
   audio.play(3);
-  if ()
+  if (gyroX > 150 || gyroY > 150 || gyroZ > 150)
+  {
+    audio.play(4);
+  }
 }
